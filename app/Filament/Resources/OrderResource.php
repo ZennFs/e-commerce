@@ -21,6 +21,7 @@ use Filament\Forms\Components\ToggleButtons;
 use App\Filament\Resources\OrderResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\OrderResource\RelationManagers;
+use App\Filament\Resources\OrderResource\RelationManagers\AddressRelationManager;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Get;
@@ -33,6 +34,8 @@ class OrderResource extends Resource
     protected static ?string $model = Order::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
+
+    protected static ?int $navigationSort = 5;
 
     public static function form(Form $form): Form
     {
@@ -50,6 +53,7 @@ class OrderResource extends Resource
                             ->label('Payment Method')
                             ->options([
                                 'cod'   =>  'Cash On Delivery',
+                                'stripe'   =>  'Stripe',
                                 'dana'  =>  'Dana',
                                 'gopay' =>  'Gopay',
                                 'ovo'   =>  'OVO',
@@ -188,7 +192,13 @@ class OrderResource extends Resource
                 Tables\Columns\TextColumn::make('payment_method')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('payment_status')
-                    ->searchable(),
+                    ->searchable()
+                    ->badge()
+                    ->color(fn(string $state): string => match ($state) {
+                        'pending'   => 'primary',
+                        'paid' => 'success',
+                        'failed' => 'danger',
+                    }),
                 Tables\Columns\TextColumn::make('currency')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('shipping_method')
@@ -232,7 +242,7 @@ class OrderResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            AddressRelationManager::class,
         ];
     }
 

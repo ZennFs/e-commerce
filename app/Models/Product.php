@@ -35,4 +35,9 @@ class Product extends Model
     public function orderItems(){
         return $this->hasMany(OrderItem::class);
     }
+
+    public function scopeSearch($query, $value){
+        $query->where('name','like',"%{$value}%")
+        ->where('is_active',1);
+    }
 }
